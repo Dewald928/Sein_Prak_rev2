@@ -1,0 +1,286 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QPixmap>
+#include <QLabel>
+#include <QPushButton>
+#include <QScreen>
+#include <QRect>
+#include <QDebug>
+#include <QColor>
+#include <math.h>
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+//load image
+void MainWindow::on_btn_load_clicked()
+{
+    //load image
+    img_in = new QImage;
+    img_in->load(":/img/deadpool.jpg");
+
+    h = img_in->height();
+    w = img_in->width();
+
+
+    //displays
+    QLabel *l = new QLabel(this);
+    l->setPixmap(QPixmap::fromImage(*img_in));
+    l->setMinimumWidth(img_in->width());
+    l->setMinimumHeight(img_in->height());
+    l->move(20,20);
+    l->show();
+    ui->gridLayout_5->addWidget(l);
+
+
+}
+
+void MainWindow::on_btn_rgb_clicked()
+{
+    //initializes images
+    img_red = new QImage(w,h,img_in->format());
+    img_green = new QImage(w,h,img_in->format());
+    img_blue = new QImage(w,h,img_in->format());
+
+    //make rgb images
+    int curcolourvalue;
+    for (int x = 0;x < w;x++)
+    {
+        for (int y = 0;y < h;y++)
+        {
+            curcolourvalue = qRed(img_in->pixel(x,y));
+            img_red->setPixel(x,y,qRgb(curcolourvalue,0,0));
+
+            curcolourvalue = qGreen(img_in->pixel(x,y));
+            img_green->setPixel(x,y,qRgb(0,curcolourvalue,0));
+
+            curcolourvalue = qBlue(img_in->pixel(x,y));
+            img_blue->setPixel(x,y,qRgb(0,0,curcolourvalue));
+        }
+    }
+
+    //displays
+    QLabel *r = new QLabel(this);
+    r->setPixmap(QPixmap::fromImage(*img_red));
+    r->setMinimumWidth(w);
+    r->setMinimumHeight(h);
+    r->move(20,20+h);
+    r->show();
+    ui->gridLayout_5->addWidget(r);
+
+    QLabel *g = new QLabel(this);
+    g->setPixmap(QPixmap::fromImage(*img_green));
+    g->setMinimumWidth(w);
+    g->setMinimumHeight(h);
+    g->move(20,20+h*2);
+    g->show();
+    ui->gridLayout_5->addWidget(g);
+
+    QLabel *b = new QLabel(this);
+    b->setPixmap(QPixmap::fromImage(*img_blue));
+    b->setMinimumWidth(w);
+    b->setMinimumHeight(h);
+    b->move(20,20+h*3);
+    b->show();
+    ui->gridLayout_5->addWidget(b);
+}
+
+void MainWindow::on_btn_sobel_clicked()
+{
+    sobel(img_red,0);
+    sobel(img_green,1);
+    sobel(img_blue,2);
+
+}
+
+void MainWindow::sobel(QImage *img, int iteration)
+{
+    //initialize vertical, horizontal and total edges
+    QImage *img_sobel_hor = new QImage(w,h,img_in->format());
+    QImage *img_sobel_ver = new QImage(w,h,img_in->format());
+    img_sobel_total[iteration] = new QImage(w,h,img_in->format());
+
+    //initialize kernels
+    int i =0;
+    int G,Gx,Gy;
+    int gx[9] = {1, 0, -1, 2, 0, -2, 1, 0, -1};
+    int gy[9] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+
+    //times kernel with each pixel
+    for (int x = 1; x < w-1; ++x)
+    {
+        for (int y = 1; y < h-1; ++y)
+        {
+            i  = 0;
+            Gx = 0;
+            Gy = 0;
+            G  = 0;
+            for (int dy = -1; dy <= 1; ++dy)
+            {
+                for (int dx = -1; dx <= 1; ++dx)
+                {
+                    Gx += qGray(img->pixel(x+dx,y+dy)) * gx[i]; //  <--- Het jou fout sommer vinnig gekry ;P
+                    Gy += qGray(img->pixel(x+dx,y+dy)) * gy[i]; //  <--- dx was dy
+                    i++;
+                }
+            }
+            G = sqrt(Gx*Gx + Gy*Gy);
+            img_sobel_ver->setPixel(x,y,Gy);
+            img_sobel_hor->setPixel(x,y,Gx);
+            img_sobel_total[iteration]->setPixel(x,y,qRgb(G,G,G));
+        }
+    }
+
+    //display horizontal edges
+    QLabel *hor_edge = new QLabel(this);
+    hor_edge->setPixmap(QPixmap::fromImage(*img_sobel_hor));
+    hor_edge->setMinimumWidth(w);
+    hor_edge->setMinimumHeight(h);
+    hor_edge->move(20+w,20+h);
+    hor_edge->show();
+    ui->gridLayout_5->addWidget(hor_edge,iteration+1, 1);
+
+
+    //display vertical edges
+    QLabel *ver_edge = new QLabel(this);
+    ver_edge->setPixmap(QPixmap::fromImage(*img_sobel_ver));
+    ver_edge->setMinimumWidth(w);
+    ver_edge->setMinimumHeight(h);
+    ver_edge->move(20+2*w,20+h);
+    ver_edge->show();
+    ui->gridLayout_5->addWidget(ver_edge,iteration+1, 2);
+
+
+    //display total edges
+    QLabel *tot_edge = new QLabel(this);
+    tot_edge->setPixmap(QPixmap::fromImage(*img_sobel_total[iteration]));
+    tot_edge->setMinimumWidth(w);
+    tot_edge->setMinimumHeight(h);
+    tot_edge->move(20+3*w,20+h);
+    tot_edge->show();
+    ui->gridLayout_5->addWidget(tot_edge, iteration+1, 3);
+
+
+}
+
+void MainWindow::on_btn_grey_clicked()
+{
+    img_grey = new QImage;
+    *img_grey = img_in->convertToFormat(QImage::Format_Grayscale8);
+
+    QLabel *gr = new QLabel(this);
+    gr->setPixmap(QPixmap::fromImage(*img_grey));
+    gr->setMinimumWidth(w);
+    gr->setMinimumHeight(h);
+    gr->move(20,20+h*6);
+    gr->show();
+    ui->gridLayout_5->addWidget(gr,6,0);
+}
+
+void MainWindow::on_btn_recon_clicked()
+{
+    //initialize image
+    img_sobel_recon = new QImage(w,h,img_in->format());
+    int r_edge = 0;
+    int g_edge = 0;
+    int b_edge = 0;
+
+
+    //add r g b total of sobels togehter
+    for (int y = 1; y < h-1; ++y)
+    {
+        for (int x = 1; x < w-1; ++x)
+        {
+            r_edge = qGray(img_sobel_total[0]->pixel(x,y));
+            g_edge = qGray(img_sobel_total[1]->pixel(x,y));
+            b_edge = qGray(img_sobel_total[2]->pixel(x,y));
+            img_sobel_recon->setPixel(x,y,qRgb(r_edge,g_edge,b_edge));
+        }
+    }
+
+    QLabel *sobel = new QLabel(this);
+    sobel->setPixmap(QPixmap::fromImage(*img_sobel_recon));
+    sobel->setMinimumWidth(w);
+    sobel->setMinimumHeight(h);
+    sobel->move(20,20+h*5);
+    sobel->show();
+    ui->gridLayout_5->addWidget(sobel,5,0);
+
+}
+
+void MainWindow::on_btn_dft_clicked()
+{
+    //initialize images
+    img_dft_real = new QImage(w,h,img_in->format());
+    img_dft_ima = new QImage(w,h,img_in->format());
+
+
+    //initialize values
+    double sumreal,realdft = 0;
+    double sumimag,imgdft = 0;
+    int colour = 0;
+    int k,l =0;
+
+    //calculate dft
+    for (int k = 0; k < h-1; ++k)
+    {
+        for (int l = 0; l < w-1; ++l)
+        {
+
+            for (int y = 0; y < h-1; ++y)
+            {
+                for (int x = 0; x < w-1; ++x)
+                {
+                    colour = qGray(img_grey->pixel(x,y));
+                    sumreal += (cos((2*M_PI)*((k*x)/h + (l*y)/w))) * colour;
+                    sumimag += (-sin((2*M_PI)*((k*x)/h + (l*y)/w))) * colour;
+                }
+            }
+
+//            realdft = log10(abs((1/w*h)*sumreal)+1);//moet sqrt?
+//            imgdft =  log10(abs((1/w*h)*sumimag)+1);
+            realdft = ((1/sqrt(w*h))*sumreal);//moet sqrt?
+            imgdft =  ((1/sqrt(w*h))*sumimag);
+
+            int realdft_int = round(realdft);
+            int imgdft_int = round(imgdft);
+
+            img_dft_real->setPixel(k,l, realdft_int);
+            img_dft_ima->setPixel(k,l,  imgdft_int);
+
+            sumreal =0;
+            sumimag =0;
+
+
+        }
+    }
+
+
+    QLabel *dft = new QLabel(this);
+    dft->setPixmap(QPixmap::fromImage(*img_dft_real));
+    dft->setMinimumWidth(w);
+    dft->setMinimumHeight(h);
+    dft->move(10+w*2,10);
+    dft->raise();
+    dft->show();
+    ui->gridLayout_5->addWidget(dft,7,0);
+
+    QLabel *dft2 = new QLabel(this);
+    dft2->setPixmap(QPixmap::fromImage(*img_dft_ima));
+    dft2->setMinimumWidth(w);
+    dft2->setMinimumHeight(h);
+    dft2->move(10+w*3,10);
+    dft2->raise();
+    dft2->show();
+    ui->gridLayout_5->addWidget(dft2,7,1);
+
+}
