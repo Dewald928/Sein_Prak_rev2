@@ -2,5 +2,6 @@
     <qresource prefix="/img">
         <file>deadpool.jpg</file>
         <file>image1.png</file>
+        <file>deadpool2.jpg</file>
     </qresource>
 </RCC>

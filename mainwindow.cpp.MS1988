@@ -246,16 +246,16 @@ void MainWindow::on_btn_dft_clicked()
                 }
             }
 
-//            realdft = log10(abs((1/sqrt(w*h))*sumreal)+1);//moet sqrt?
-//            imgdft =  log10(abs((1/sqrt(w*h))*sumimag)+1);
-            realdft = ((1/w*h)*sumreal);//moet sqrt?
-            imgdft =  ((1/w*h)*sumimag);
+//            realdft = log10(abs((1/w*h)*sumreal)+1);//moet sqrt?
+//            imgdft =  log10(abs((1/w*h)*sumimag)+1);
+            realdft = ((1/sqrt(w*h))*sumreal);//moet sqrt?
+            imgdft =  ((1/sqrt(w*h))*sumimag);
 
             int realdft_int = round(realdft);
             int imgdft_int = round(imgdft);
 
-            img_dft_real->setPixel(k,l, realdft_int);
-            img_dft_ima->setPixel(k,l,  imgdft_int);
+            img_dft_real->setPixel(k,l, qGray(realdft_int));
+            img_dft_ima->setPixel(k,l,  qGray(imgdft_int));
 
             sumreal =0;
             sumimag =0;
