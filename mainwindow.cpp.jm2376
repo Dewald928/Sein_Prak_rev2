@@ -8,11 +8,6 @@
 #include <QDebug>
 #include <QColor>
 #include <math.h>
-#include <complex>
-#include <iostream>
-#include <QVector>
-#include <time.h>
-using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,7 +26,7 @@ void MainWindow::on_btn_load_clicked()
 {
     //load image
     img_in = new QImage;
-    img_in->load(":/img/deadpool2.jpg");
+    img_in->load(":/img/deadpool.jpg");
 
     h = img_in->height();
     w = img_in->width();
@@ -224,164 +219,6 @@ void MainWindow::on_btn_recon_clicked()
 
 void MainWindow::on_btn_dft_clicked()
 {
-    //initialize images
-    img_dft_amp = new QImage(w,h,img_in->format());
-    img_dft_phase = new QImage(w,h,img_in->format());
 
-
-    //1-D dft on each row and coloumn
-    DFT1();
-
-    //normalize dft to image
-    cout << "Start dft print: " << clock()/1000 << " "  << endl;
-    int tempMag =0;
-    int tempPhase =0;
-
-    for (int k = 0; k < w-1; ++k)
-    {
-        for (int l = 0; l < h-1; ++l)
-        {
-            tempMag = (int)(round( std::abs(complex_2D[k][l])));
-            tempPhase = (int)(round( std::arg(complex_2D[k][l])))*255/2*M_PI;
-            img_dft_amp->setPixel(k,l,qRgb(tempMag,tempMag,tempMag));
-            img_dft_phase->setPixel(k,l,qRgb(tempPhase,tempPhase,tempPhase));
-        }
-    }
-
-
-    //display mag
-    QLabel *mag = new QLabel(this);
-    mag->setPixmap(QPixmap::fromImage(*img_dft_amp));
-    mag->setMinimumWidth(w);
-    mag->setMinimumHeight(h);
-    //mag->move(20,20+h*7);
-    mag->show();
-    ui->gridLayout_5->addWidget(mag,7,0);
-
-    //display phase
-    QLabel *phase = new QLabel(this);
-    phase->setPixmap(QPixmap::fromImage(*img_dft_phase));
-    phase->setMinimumWidth(w);
-    phase->setMinimumHeight(h);
-    phase->show();
-    ui->gridLayout_5->addWidget(phase,7,1);
-
-
-    cout << "End dft print: " << clock()/1000 << " "  << endl;
-
-
-
-}
-
-
-void MainWindow::IDFT1()
-{
-    double pi2 = 2.0 * M_PI;
-    complex<double> F (0,0);
-    double M = w;
-    double N = h;
-    int pixVal;
-
-    inverse_2D.resize(N);
-    inverse_2D[0].resize(w);
-
-    for (int x = 0; x < M; ++x)
-    {
-        for (int y = 0; y < N; ++y)
-        {
-
-            inverse_2D[x][y] = 0;
-            inverse_2D[y].resize(w);
-            //inverse fourier
-            for (int u = 0; u < M-1; ++u)
-            {
-                for (int v = 0; v < N-1; ++v)
-                {
-                    F = complex_2D[u][v];
-                    inverse_2D[x][y] += F * exp(complex<double> (0,pi2*((u*x)/M + (v*y)/N)));
-
-                }
-            }
-            inverse_2D[x][y] *= 1/sqrt(M*N);
-            pixVal = (int)(std::abs(inverse_2D[x][y]));
-            img_idft->setPixel(x,y,qRgb(pixVal,pixVal,pixVal));
-
-        }
-    }
-
-
-
-
-}
-
-void MainWindow::DFT1()
-{
-    cout << "Start DFT: " << clock()/1000 << " "  << endl;
-    double pi2 = 2.0 * M_PI;
-    double pixVal;
-    double M = w;
-    double N = h;
-    complex<double> tc (0,0);
-
-
-
-    complex_1D.resize(M);
-    complex_2D.resize(N);
-    complex_2D[0].resize(w);
-
-    //fourier pixel k
-    for (int k = 0; k < M; ++k)
-    {
-
-        //for pixel l
-        for (int l = 0; l < N; ++l)
-        {
-            complex_2D[k][l] = 0;
-            complex_2D[l].resize(w);
-            tc = 0;
-            //1 coloumn
-            for (int m = 0; m < M-1; ++m)
-            {
-
-                //1 row
-                for (int n = 0; n < N-1; ++n)
-                {
-
-                    pixVal = qGray(img_grey->pixel(m,n));
-                    complex_2D[k][l] += pixVal * exp(complex<double> (0,-pi2*((k*m)/M + (l*n)/N)));
-
-                }
-            }
-            complex_2D[k][l] *= 1/sqrt(M*N);
-            //qDebug() << " is " << std::abs(complex_2D[k][l]) << "*e^i*" << std::arg(complex_2D[k][l]) << "rad\n";
-        }
-    }
-    cout << "End DFT: " << clock()/1000 << " "  << endl;
-
-}
-
-
-
-
-void MainWindow::on_btn_idft_clicked()
-{
-    //initialize idft image
-    img_idft = new QImage(w,h,img_in->format());
-
-    //run idft
-    cout << "Start Inverse DFT: " << clock()/1000 << " "  << endl;
-    IDFT1();
-
-    //display image
-    //display phase
-    QLabel *inverse = new QLabel(this);
-    inverse->setPixmap(QPixmap::fromImage(*img_idft));
-    inverse->setMinimumWidth(w);
-    inverse->setMinimumHeight(h);
-    inverse->show();
-    ui->gridLayout_5->addWidget(inverse,8,0);
-
-
-    cout << "End Inverse DFT " << clock()/1000 << " "  << endl;
 
 }
