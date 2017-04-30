@@ -238,7 +238,7 @@ void MainWindow::on_btn_dft_clicked()
     DFT1();
 
     //normalize dft to image and shift
-    cout << "Start dft print: " << clock()/1000 << " "  << endl;
+    cout << "Start dft print: " << clock() << " "  << endl;
     int tempMag =0;
     int tempPhase =0;
 
@@ -261,7 +261,7 @@ void MainWindow::on_btn_dft_clicked()
             tempMag = (int)(round( std::abs(complex_2D[k][l])));
             img_dft_amp->setPixel( k, l , qRgb(tempMag,tempMag,tempMag));
             //phase
-            tempPhase = (int)(round( std::arg(complex_2D[k][l])))*255/2*M_PI;            
+            tempPhase = (int)(round( std::arg(complex_2D[k][l])))*255/2*M_PI;
             img_dft_phase->setPixel( k, l , qRgb(tempPhase,tempPhase,tempPhase));
 
             //shifted magnitude
@@ -308,7 +308,7 @@ void MainWindow::on_btn_dft_clicked()
     ui->gridLayout_5->addWidget(phase,7,1);
 
 
-    cout << "End dft print: " << clock()/1000 << " "  << endl;
+    cout << "End dft print: " << clock() << " "  << endl;
 
 
 
@@ -348,6 +348,7 @@ void MainWindow::IDFT1()
             img_idft->setPixel(x,y,qRgb(pixVal,pixVal,pixVal));
 
         }
+        ui->progressBar->setValue(100*x/M +2);
     }
 
 
@@ -357,7 +358,7 @@ void MainWindow::IDFT1()
 
 void MainWindow::DFT1()
 {
-    cout << "Start DFT: " << clock()/1000 << " "  << endl;
+    cout << "Start DFT: " << clock() << " "  << endl;
     double pi2 = 2.0 * M_PI;
     double pixVal;
     double M = w;
@@ -395,8 +396,9 @@ void MainWindow::DFT1()
             }
             complex_2D[k][l] *= 1/sqrt(M*N);
         }
+        ui->progressBar->setValue(100*k/M+2);
     }
-    cout << "End DFT: " << clock()/1000 << " "  << endl;
+    cout << "End DFT: " << clock() << " "  << endl;
 
 }
 
@@ -409,7 +411,7 @@ void MainWindow::on_btn_idft_clicked()
     img_idft = new QImage(w,h,img_in->format());
 
     //run idft
-    cout << "Start Inverse DFT: " << clock()/1000 << " "  << endl;
+    cout << "Start Inverse DFT: " << clock() << " "  << endl;
     IDFT1();
 
     //display image
@@ -422,6 +424,6 @@ void MainWindow::on_btn_idft_clicked()
     ui->gridLayout_5->addWidget(inverse,9,0);
 
 
-    cout << "End Inverse DFT " << clock()/1000 << " "  << endl;
+    cout << "End Inverse DFT " << clock() << " "  << endl;
 
 }
