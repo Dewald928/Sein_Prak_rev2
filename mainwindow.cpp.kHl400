@@ -230,8 +230,6 @@ void MainWindow::on_btn_dft_clicked()
     //initialize images
     img_dft_amp = new QImage(w,h,img_in->format());
     img_dft_phase = new QImage(w,h,img_in->format());
-    img_dft_amp_shift = new QImage(w,h,img_in->format());
-    img_dft_phase_shift = new QImage(w,h,img_in->format());
 
 
     //1-D dft on each row and coloumn
@@ -242,53 +240,25 @@ void MainWindow::on_btn_dft_clicked()
     int tempMag =0;
     int tempPhase =0;
 
-    for (int k = 0; k < (w/2)-1; ++k) {
-        for (int l = 0; l < (h/2)-1; ++l) {
-
-            DFTShifted[k + (w/2)][l + (h/2)] = complex_2D[k][l];
-            DFTShifted[k][l] = complex_2D[k + w/2][l + h/2];
-            DFTShifted[k + w/2][l] = complex_2D[k][l + h/2];
-            DFTShifted[k][l + h/2] = complex_2D[k + w/2][l];
-        }
-    }
-
-
     for (int k = 0; k < w-1; ++k)
     {
         for (int l = 0; l < h-1; ++l)
         {
-            //magnitude
             tempMag = (int)(round( std::abs(complex_2D[k][l])));
-            img_dft_amp->setPixel( k, l , qRgb(tempMag,tempMag,tempMag));
-            //phase
-            tempPhase = (int)(round( std::arg(complex_2D[k][l])))*255/2*M_PI;            
-            img_dft_phase->setPixel( k, l , qRgb(tempPhase,tempPhase,tempPhase));
+            tempPhase = (int)(round( std::arg(complex_2D[k][l])))*255/2*M_PI;
 
-            //shifted magnitude
-            tempMag = (int)(round( std::abs(DFTShifted[k][l])));
-            img_dft_amp_shift->setPixel( k, l , qRgb(tempMag,tempMag,tempMag));
-            //shifted phase
-            tempPhase = (int)(round( std::arg(DFTShifted[k][l])))*255/2*M_PI;
-            img_dft_phase_shift->setPixel( k, l , qRgb(tempPhase,tempPhase,tempPhase));
+            if ((k < (w-1)/2) && (l < (h-1)/2)) {
+                img_dft_amp->setPixel( (w-1)/2 + k, (h-1)/2 + l , qRgb(tempMag,tempMag,tempMag));
+                img_dft_phase->setPixel( (w-1)/2 + k, (h-1)/2 + l , qRgb(tempPhase,tempPhase,tempPhase));
+            }
+
+
+
         }
     }
 
+    //shift freqcuencies
 
-    //display mag shift
-    QLabel *mag_shift = new QLabel(this);
-    mag_shift->setPixmap(QPixmap::fromImage(*img_dft_amp_shift));
-    mag_shift->setMinimumWidth(w);
-    mag_shift->setMinimumHeight(h);
-    mag_shift->show();
-    ui->gridLayout_5->addWidget(mag_shift,8,0);
-
-    //display phase shift
-    QLabel *phase_shift = new QLabel(this);
-    phase_shift->setPixmap(QPixmap::fromImage(*img_dft_phase_shift));
-    phase_shift->setMinimumWidth(w);
-    phase_shift->setMinimumHeight(h);
-    phase_shift->show();
-    ui->gridLayout_5->addWidget(phase_shift,8,1);
 
 
     //display mag
@@ -296,6 +266,7 @@ void MainWindow::on_btn_dft_clicked()
     mag->setPixmap(QPixmap::fromImage(*img_dft_amp));
     mag->setMinimumWidth(w);
     mag->setMinimumHeight(h);
+    //mag->move(20,20+h*7);
     mag->show();
     ui->gridLayout_5->addWidget(mag,7,0);
 
@@ -362,24 +333,24 @@ void MainWindow::DFT1()
     double pixVal;
     double M = w;
     double N = h;
+    complex<double> tc (0,0);
 
+
+
+    complex_1D.resize(M);
     complex_2D.resize(N);
-    complex_2D[0].resize(M);
-    DFTShifted.resize(N);
-    DFTShifted[0].resize(M);
+    complex_2D[0].resize(w);
 
     //fourier pixel k
-    for (int k = 0; k < M-1; ++k)
+    for (int k = 0; k < M; ++k)
     {
 
         //for pixel l
-        for (int l = 0; l < N-1; ++l)
+        for (int l = 0; l < N; ++l)
         {
             complex_2D[k][l] = 0;
             complex_2D[l].resize(w);
-            DFTShifted[l].resize(w);
-            DFTShifted[k][l] = 0;
-
+            tc = 0;
             //1 coloumn
             for (int m = 0; m < M-1; ++m)
             {
@@ -394,6 +365,7 @@ void MainWindow::DFT1()
                 }
             }
             complex_2D[k][l] *= 1/sqrt(M*N);
+            //qDebug() << " is " << std::abs(complex_2D[k][l]) << "*e^i*" << std::arg(complex_2D[k][l]) << "rad\n";
         }
     }
     cout << "End DFT: " << clock()/1000 << " "  << endl;
@@ -419,7 +391,7 @@ void MainWindow::on_btn_idft_clicked()
     inverse->setMinimumWidth(w);
     inverse->setMinimumHeight(h);
     inverse->show();
-    ui->gridLayout_5->addWidget(inverse,9,0);
+    ui->gridLayout_5->addWidget(inverse,8,0);
 
 
     cout << "End Inverse DFT " << clock()/1000 << " "  << endl;

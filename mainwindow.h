@@ -39,6 +39,7 @@ private:
     Ui::MainWindow *ui;
 
     QImage *img_in, *img_red, *img_green, *img_blue, *img_grey, *img_dft_amp, *img_dft_phase, *img_idft;
+    QImage *img_dft_amp_shift, *img_dft_phase_shift;
     QImage *img_sobel_total[3];
     QImage *img_sobel_recon;
 
@@ -47,6 +48,7 @@ private:
     QVector< complex < double > > complex_1D;
     QVector< QVector < complex < double > > > complex_2D;
     QVector< QVector < complex < double > > > inverse_2D;
+    QVector< QVector < complex < double > > > DFTShifted;
 
     //idft 1-D Function
     void IDFT1();
