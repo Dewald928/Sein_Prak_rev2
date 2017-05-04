@@ -42,6 +42,7 @@ private:
     QImage *img_dft_amp_shift, *img_dft_phase_shift;
     QImage *img_sobel_total[3];
     QImage *img_sobel_recon;
+    //char *imgName[];
 
     //complex<double> *data; //complex datatype
     //complex<double> *dataout; //complex datatype

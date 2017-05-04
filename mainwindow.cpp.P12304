@@ -19,12 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->btn_rgb->setEnabled(false);
-    ui->btn_sobel->setEnabled(false);
-    ui->btn_recon->setEnabled(false);
-    ui->btn_grey->setEnabled(false);
-    ui->btn_dft->setEnabled(false);
-    ui->btn_idft->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -52,9 +46,6 @@ void MainWindow::on_btn_load_clicked()
     l->move(20,20);
     l->show();
     ui->gridLayout_5->addWidget(l);
-
-    ui->btn_rgb->setEnabled(true);
-    ui->btn_grey->setEnabled(true);
 
 
 }
@@ -109,11 +100,9 @@ void MainWindow::on_btn_rgb_clicked()
     ui->gridLayout_5->addWidget(b);
 
     //save image
-    img_red->save("1_red.png", "PNG");
-    img_green->save("2_green.png", "PNG");
-    img_blue->save("3_blue.png", "PNG");
-
-    ui->btn_sobel->setEnabled(true);
+    img_red->save("red.png", "PNG");
+    img_green->save("green.png", "PNG");
+    img_blue->save("blue.png", "PNG");
 
 }
 
@@ -122,8 +111,6 @@ void MainWindow::on_btn_sobel_clicked()
     sobel(img_red,0);
     sobel(img_green,1);
     sobel(img_blue,2);
-
-    ui->btn_recon->setEnabled(true);
 
 }
 
@@ -201,7 +188,7 @@ void MainWindow::on_btn_grey_clicked()
 {
     img_grey = new QImage;
     *img_grey = img_in->convertToFormat(QImage::Format_Grayscale8);
-    img_grey->save("5_5_gray.png", "PNG");
+    img_grey->save("deadpool_gray.png", "PNG");
 
     QLabel *gr = new QLabel(this);
     gr->setPixmap(QPixmap::fromImage(*img_grey));
@@ -210,8 +197,6 @@ void MainWindow::on_btn_grey_clicked()
     gr->move(20,20+h*6);
     gr->show();
     ui->gridLayout_5->addWidget(gr,6,0);
-
-    ui->btn_dft->setEnabled(true);
 
 
 }
@@ -246,7 +231,7 @@ void MainWindow::on_btn_recon_clicked()
     ui->gridLayout_5->addWidget(sobel,5,0);
 
     //save image
-    img_sobel_recon->save("4_sobel.png", "PNG");
+    img_sobel_recon->save("Sobel.png", "PNG");
 
 }
 
@@ -336,11 +321,10 @@ void MainWindow::on_btn_dft_clicked()
     cout << "End dft print: " << clock() << " "  << endl;
 
     //save image
-    img_dft_amp_shift->save("5_DFTShifted_Mag.png", "PNG");
-    img_dft_phase_shift->save("6_DFTShifted_Phase.png", "PNG");
+    img_dft_amp_shift->save("DFTShifted_Mag.png", "PNG");
+    img_dft_phase_shift->save("DFTShifted_Phase.png", "PNG");
 
 
-    ui->btn_idft->setEnabled(true);
 
 }
 
@@ -457,6 +441,6 @@ void MainWindow::on_btn_idft_clicked()
     cout << "End Inverse DFT " << clock() << " "  << endl;
 
     //save images
-    img_idft->save("7_IDFT.png", "PNG");
+    img_idft->save("IDFT.png", "PNG");
 
 }
